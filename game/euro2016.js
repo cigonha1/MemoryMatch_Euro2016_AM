@@ -83,17 +83,20 @@ function createCountries() {
 function render() {}
 
 // baralha as cartas no tabuleiro
-function scramble() {}
+function scramble() {
+  let allCards = Array.from(document.querySelectorAll(".carta"));
+  let shuffled = allCards
+    .filter((card) => !card.classList.contains("encontrada")) // Só baralha as cartas não encontradas
+    .sort(() => Math.random() - 0.5); // Baralha aleatoriamente
 
-function exemplo() {
-  let o1 = { id: 1, pos: { x: 10, y: 20 } };
-  let o2 = { id: 2, pos: { x: 1, y: 2 } };
-  let aux = Object.assign({}, o1);
-
-  o1.pos = Object.assign({}, o2.pos);
-
-  let umaFace = Object.create(face);
-  umaFace.novaProp = "asdasd";
+  // Posiciona as cartas baralhadas no tabuleiro
+  shuffled.forEach((card, index) => {
+    const x = index % COLS;
+    const y = Math.floor(index / ROWS);
+    card.style.top = `${y * CARDSIZE}px`;
+    card.style.left = `${x * CARDSIZE}px`;
+    card.classList.add("escondida"); // Garante que as cartas ficam viradas para baixo
+  })
 }
 
 function tempo() {
