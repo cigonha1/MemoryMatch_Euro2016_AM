@@ -12,6 +12,7 @@ const sounds = {
   flip: "",
   success: "",
   hide: "",
+  warning: "",
 };
 
 // numero de linhas e colunas do tabuleiro;
@@ -128,18 +129,24 @@ function checkMatch(cards) {
 
 function tempo() {
   let contador = 0;
-  let maxCount = 60;
+  let maxCount = 45;
 
   let timeHandler = setInterval(() => {
     contador++;
     document.getElementById("time").value = contador;
-    if (contador === maxCount - 5)
+
+    if (contador === maxCount - 5) {
       document.getElementById("time").classList.add("warning");
+      sounds.warning.play(); // Toca o som de aviso
+    }
+
     if (contador === maxCount) {
       clearInterval(timeHandler);
       document.getElementById("time").classList.remove("warning");
+      scramble(); // Baralha as cartas novamente
+      contador = 0; // Reseta o contador
     }
-  }, 1);
+  }, 1000);
 }
 
 /* ------------------------------------------------------------------------------------------------  
@@ -153,9 +160,11 @@ function setupAudio() {
   game.sounds.flip = document.querySelector("#flipSnd");
   game.sounds.hide = document.querySelector("#hideSnd");
   game.sounds.win = document.querySelector("#goalSnd");
+  game.sounds.warning = document.querySelector("#warningSnd");
 
   // definições de volume;
   game.sounds.background.volume = 0.05; // o volume varia entre 0 e 1
+  game.sounds.warning.volume = 0.1;
 
   // nesta pode-se mexer se for necessário acrescentar ou configurar mais sons
 }
