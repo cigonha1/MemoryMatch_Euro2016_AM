@@ -96,7 +96,34 @@ function scramble() {
     card.style.top = `${y * CARDSIZE}px`;
     card.style.left = `${x * CARDSIZE}px`;
     card.classList.add("escondida"); // Garante que as cartas ficam viradas para baixo
-  })
+  });
+}
+
+let flipped = [];
+
+function flipCard(card) {
+  if (flipped.length < 2 && !card.classList.contains("encontrada")) {
+    card.classList.remove("escondida"); // Vira a carta
+    flipped.push(card);
+
+    if (flipped.length === 2) {
+      checkMatch(flipped);
+    }
+  }
+}
+
+function checkMatch(cards) {
+  if (cards[0].dataset.country === cards[1].dataset.country) {
+    cards[0].classList.add("encontrada");
+    cards[1].classList.add("encontrada");
+    flipped = []; // Reseta as cartas viradas
+  } else {
+    setTimeout(() => {
+      cards[0].classList.add("escondida");
+      cards[1].classList.add("escondida");
+      flipped = []; // Reseta as cartas viradas
+    }, 500); // Deixa as cartas vísiveis por 500ms antes de voltar a esconder
+  }
 }
 
 function tempo() {
