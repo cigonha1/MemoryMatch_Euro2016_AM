@@ -12,7 +12,7 @@ const sounds = {
   flip: "",
   success: "",
   hide: "",
-  warning: "",
+  win: "",
 };
 
 // numero de linhas e colunas do tabuleiro;
@@ -42,68 +42,69 @@ function init() {
   setupAudio(); // configurar o audio
   getFaces(); // calcular as faces e guardar no array faces
   createCountries(); // criar países
-  game.sounds.background.play();
-
-  //completar
+  tempo(); // iniciar o temporizador
+  sounds.background.play();
 }
 
 // Cria os paises e coloca-os no tabuleiro de jogo(array board[][])
 function createCountries() {
-  let cardIndex = 0;
-  for (let i = 0; i < ROWS; i++) {
-    for (let j = 0; j < COLS; j++) {
-      let umaCarta = document.createElement("div");
-      umaCarta.classList.add("carta");
+  let indices = [...Array(8).keys(), ...Array(8).keys()]; // Cria um array 8 elementos
+  indices.sort(() => Math.random() - 0.5); // Baralha os indices
 
-      // Posição da carta com base nas coordenadas das faces
-      umaCarta.style.backgroundPositionX = faces[cardIndex].x;
-      umaCarta.style.backgroundPositionY = faces[cardIndex].y;
-      umaCarta.dataset.country = faces[cardIndex].country; // Atribui o país à carta
-      umaCarta.classList.add("escondida"); // Carta começa escondida
+  for (let i = 0; i < 16; i++) {
+    let umaCarta = document.createElement("div");
+    umaCarta.classList.add("carta", "escondida");
 
-      // Define tamanho e posição das cartas
-      umaCarta.style.width = `${CARDSIZE}px`;
-      umaCarta.style.height = `${CARDSIZE}px`;
-      umaCarta.style.top = `${i * CARDSIZE}px`;
-      umaCarta.style.left = `${j * CARDSIZE}px`;
+    // Posição da carta com base nas coordenadas das faces
+    umaCarta.style.backgroundPositionX = faces[indices[i]].x;
+    umaCarta.style.backgroundPositionY = faces[indices[i]].y;
+    umaCarta.dataset.country = faces[indices[i]].country; // Atribui o país à carta
 
-      // Adiciona as cartas ao tabuleiro
-      game.stage.appendChild(umaCarta);
+    // Define tamanho e posição das cartas
+    umaCarta.style.width = `${CARDSIZE}px`;
+    umaCarta.style.height = `${CARDSIZE}px`;
 
-      // Aumenta o índice da próxima face
-      cardIndex++;
+    // Adiciona as cartas ao tabuleiro
+    game.stage.appendChild(umaCarta);
 
-      // Adiciona o evento de clique para virar as cartas
-      umaCarta.addEventListener("click", () => flipCard(umaCarta));
-    }
+    // Adiciona o evento de clique para virar as cartas
+    umaCarta.addEventListener("click", () => flipCard(umaCarta));
   }
-  scramble(); // Baralha as cartas
+  scramble();
 }
 
-// Adicionar as cartas do tabuleiro à stage
-function render() {}
-
-// baralha as cartas no tabuleiro
+// Baralha as cartas no tabuleiro
 function scramble() {
   let allCards = Array.from(document.querySelectorAll(".carta"));
+
+  // Posiciona as cartas baralhadas no tabuleiro
+  allCards.forEach((card, index) => {
+    const x = index % COLS;
+    const y = Math.floor(index / ROWS);
+    card.style.top = `${y * CARDSIZE}px`;
+    card.style.left = `${x * CARDSIZE}px`;
+  });
+
   let shuffled = allCards
     .filter((card) => !card.classList.contains("encontrada")) // Só baralha as cartas não encontradas
     .sort(() => Math.random() - 0.5); // Baralha aleatoriamente
 
   // Posiciona as cartas baralhadas no tabuleiro
-  shuffled.forEach((card, index) => {
-    const x = index % COLS;
-    const y = Math.floor(index / ROWS);
-    card.style.top = `${y * CARDSIZE}px`;
-    card.style.left = `${x * CARDSIZE}px`;
-    card.classList.add("escondida"); // Garante que as cartas ficam viradas para baixo
+  shuffled.forEach((card) => {
+    card.style.position = "absolute"; // Garante que o posicionamento é absoluto
   });
+  tempo(); // Reinicia o temporizador
 }
 
 let flipped = [];
 
 function flipCard(card) {
-  if (flipped.length < 2 && !card.classList.contains("encontrada")) {
+  sounds.background.play();
+  if (
+    flipped.length < 2 &&
+    !card.classList.contains("encontrada") &&
+    !flipped.includes(card)
+  ) {
     card.classList.remove("escondida"); // Vira a carta
     flipped.push(card);
 
@@ -113,38 +114,83 @@ function flipCard(card) {
   }
 }
 
+// Verifica se encontrou o par
 function checkMatch(cards) {
   if (cards[0].dataset.country === cards[1].dataset.country) {
-    cards[0].classList.add("encontrada");
-    cards[1].classList.add("encontrada");
+    cards.forEach((card) => card.classList.add("encontrada")); // Marca as cartas como encontradas
+    game.sounds.success.play();
     flipped = []; // Reseta as cartas viradas
+    checkForWin();
   } else {
     setTimeout(() => {
-      cards[0].classList.add("escondida");
-      cards[1].classList.add("escondida");
+      cards.forEach((card) => card.classList.add("escondida")); // Volta a virar as cartas
+      game.sounds.hide.play();
       flipped = []; // Reseta as cartas viradas
     }, 500); // Deixa as cartas vísiveis por 500ms antes de voltar a esconder
   }
 }
 
+// Verificar se o jogador ganhou
+function checkForWin() {
+  let allCards = Array.from(document.querySelectorAll(".carta"));
+  let unmatchedCards = allCards.filter(
+    (card) => !card.classList.contains("encontrada")
+  );
+
+  if (unmatchedCards.length === 0) {
+    // Todas as cartas foram encontradas
+    console.log("Ganhaste o jogo!");
+    sounds.win.play(); // Toca o som de vitória
+    setTimeout(restartGame, 3000); // Recomeça o jogo após 3 segundos
+  }
+}
+
+function restartGame() {
+  // Reseta as variáveis do jogo
+  flipped = [];
+  backgroundSoundPlaying = false;
+
+  // Limpar o tabuleiro
+  game.stage.innerHTML = "";
+
+  // Recriar as cartas e recomeçar o jogo
+  createCountries();
+  tempo();
+  game.sounds.background.play();
+}
+
+// Adiciona o evento para recomeçar a qualquer momento
+window.addEventListener("keydown", (event) => {
+  if (event.code === "Space") {
+    restartGame();
+  }
+});
+
+let timeHandler;
+
 function tempo() {
   let contador = 0;
   let maxCount = 45;
 
-  let timeHandler = setInterval(() => {
+  // Apagar qualquer timer anterior
+  if (timeHandler) {
+    clearInterval(timeHandler);
+  }
+
+  timeHandler = setInterval(() => {
     contador++;
     document.getElementById("time").value = contador;
 
     if (contador === maxCount - 5) {
       document.getElementById("time").classList.add("warning");
-      sounds.warning.play(); // Toca o som de aviso
     }
 
     if (contador === maxCount) {
       clearInterval(timeHandler);
       document.getElementById("time").classList.remove("warning");
       scramble(); // Baralha as cartas novamente
-      contador = 0; // Reseta o contador
+      tempo(); // Restart the timer
+      contador = 0; // Reset the contador
     }
   }, 1000);
 }
@@ -160,11 +206,9 @@ function setupAudio() {
   game.sounds.flip = document.querySelector("#flipSnd");
   game.sounds.hide = document.querySelector("#hideSnd");
   game.sounds.win = document.querySelector("#goalSnd");
-  game.sounds.warning = document.querySelector("#warningSnd");
 
   // definições de volume;
   game.sounds.background.volume = 0.05; // o volume varia entre 0 e 1
-  game.sounds.warning.volume = 0.1;
 
   // nesta pode-se mexer se for necessário acrescentar ou configurar mais sons
 }
