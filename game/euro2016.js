@@ -76,24 +76,29 @@ function createCountries() {
 // Baralha as cartas no tabuleiro
 function scramble() {
   let allCards = Array.from(document.querySelectorAll(".carta"));
-
-  // Posiciona as cartas baralhadas no tabuleiro
-  allCards.forEach((card, index) => {
-    const x = index % COLS;
-    const y = Math.floor(index / ROWS);
-    card.style.top = `${y * CARDSIZE}px`;
-    card.style.left = `${x * CARDSIZE}px`;
-  });
-
   let shuffled = allCards
-    .filter((card) => !card.classList.contains("encontrada")) // Só baralha as cartas não encontradas
-    .sort(() => Math.random() - 0.5); // Baralha aleatoriamente
+    .filter((card) => !card.classList.contains("encontrada"))
+    .sort(() => Math.random() - 0.5);
 
-  // Posiciona as cartas baralhadas no tabuleiro
-  shuffled.forEach((card) => {
-    card.style.position = "absolute"; // Garante que o posicionamento é absoluto
+  // Get only unmatched cards positions
+  let positions = [];
+  for (let i = 0; i < shuffled.length; i++) {
+    const x = i % COLS;
+    const y = Math.floor(i / ROWS);
+    positions.push({ x: x * CARDSIZE, y: y * CARDSIZE });
+  }
+
+  // Shuffle positions and apply to unmatched cards
+  positions.sort(() => Math.random() - 0.5);
+  shuffled.forEach((card, index) => {
+    card.style.position = "absolute";
+    card.style.top = `${positions[index].y}px`;
+    card.style.left = `${positions[index].x}px`;
+    // Ensure cards are face down when scrambled
+    if (!card.classList.contains("encontrada")) {
+      card.classList.add("escondida");
+    }
   });
-  tempo(); // Reinicia o temporizador
 }
 
 let flipped = [];
@@ -172,7 +177,6 @@ function tempo() {
   let contador = 0;
   let maxCount = 45;
 
-  // Apagar qualquer temporizador anterior
   if (timeHandler) {
     clearInterval(timeHandler);
   }
@@ -182,15 +186,22 @@ function tempo() {
     document.getElementById("time").value = contador;
 
     if (contador === maxCount - 5) {
-      document.getElementById("time").classList.add("warning"); // Aplica a classe "warning" para animar a barra de progresso
+      document.getElementById("time").classList.add("warning");
     }
 
     if (contador === maxCount) {
       clearInterval(timeHandler);
       document.getElementById("time").classList.remove("warning");
-      scramble(); // Baralha as cartas novamente
-      tempo(); // Reinicia o temporizador
-      contador = 0; // Reseta o contador
+      // Reset any flipped but unmatched cards
+      flipped.forEach(card => {
+        if (!card.classList.contains("encontrada")) {
+          card.classList.add("escondida");
+        }
+      });
+      flipped = [];
+      scramble(); // First scramble
+      contador = 0; // Reset counter
+      tempo(); // Then restart timer
     }
   }, 1000);
 }
