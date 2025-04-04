@@ -43,7 +43,15 @@ function init() {
   getFaces(); // calcular as faces e guardar no array faces
   createCountries(); // criar países
   tempo(); // iniciar o temporizador
-  sounds.background.play();
+
+  // Esperar interação para começar a música
+  document.addEventListener("click", playBgSnd, { once: true });
+}
+
+function playBgSnd() {
+  sounds.background.play().catch((error) => {
+    console.error("Falha ao inciar a música:", error);
+  });
 }
 
 // Cria os países e coloca-os no tabuleiro de jogo (array board[][])
@@ -137,6 +145,7 @@ function flipCard(card) {
     !flipped.includes(card)
   ) {
     card.classList.remove("escondida"); // Vira a carta
+    game.sounds.flip.play();
     flipped.push(card);
 
     if (flipped.length === 2) {
@@ -169,9 +178,6 @@ function checkForWin() {
   );
 
   if (unmatchedCards.length === 0) {
-    // Obter o tempo final
-    let finalTime = document.getElementById("time").value;
-
     // Criar div com sumário
     let summary = document.createElement("div");
     summary.style.cssText = `
@@ -188,38 +194,47 @@ function checkForWin() {
     `;
     summary.innerHTML = `
       <h2>Parabéns!</h2>
-      <p>Completaste o jogo em ${finalTime} segundos!</p>
+      <p>Completaste o jogo em ${globalTime} segundos!</p>
       <p>Pressiona ESPAÇO para jogar novamente</p>
     `;
     document.body.appendChild(summary);
 
     sounds.win.play();
-    clearInterval(timeHandler); // Parar o temporizador
+    clearInterval(timeHandler); // Para o temporizador
 
+    // Verifica se o sumário existe
     setTimeout(() => {
-      document.body.removeChild(summary);
+      if (document.body.contains(summary)) {
+        document.body.removeChild(summary);
+      }
       restartGame();
-    }, 30000);
+    }, 5000);
   }
 }
 
 function restartGame() {
-  // Reseta as variáveis do jogo
+  // Reseta as variáveis de jogo
   flipped = [];
+  globalTime = 0;
 
-  // Limpar o tabuleiro
+  // Remove o sumário de jogo, se existir
+  const summary = document.querySelector("div[style*='z-index: 100']");
+  if (summary && document.body.contains(summary)) {
+    document.body.removeChild(summary);
+  }
+
+  // Limpar o tabuliro
   game.stage.innerHTML = "";
 
-  // Recriar as cartas e recomeçar o jogo
+  // Recria o tabuleiro e reinicia o jogo
   createCountries();
   tempo();
-  game.sounds.background.play();
 }
 
-// Adiciona o evento para recomeçar a qualquer momento
+// Evento para reiniciar o jogo ao pressionar a tecla "Espaço"
 window.addEventListener("keydown", (event) => {
   if (event.code === "Space") {
-    // Remover o sumário se existir
+    // Remove o sumário de jogo
     const summary = document.querySelector("div[style*='z-index: 100']");
     if (summary) {
       document.body.removeChild(summary);
@@ -229,27 +244,32 @@ window.addEventListener("keydown", (event) => {
 });
 
 let timeHandler;
+let globalTime = 0; // Cronómetro global
 
 function tempo() {
-  let contador = 0;
-  let maxCount = 45;
+  let localTime = 0; // Cronómetro local
+  const maxTime = 45;
+  const timeElement = document.getElementById("time");
 
   if (timeHandler) {
     clearInterval(timeHandler);
   }
 
   timeHandler = setInterval(() => {
-    contador++;
-    document.getElementById("time").value = contador;
+    globalTime++;
+    localTime++;
 
-    if (contador === maxCount - 5) {
-      document.getElementById("time").classList.add("warning");
+    timeElement.value = localTime;
+
+    // Warning de 5 segundos
+    if (localTime === maxTime - 5) {
+      timeElement.classList.add("warning");
     }
 
-    if (contador === maxCount) {
-      clearInterval(timeHandler);
-      document.getElementById("time").classList.remove("warning");
-      // Resetar cartas viradas, mas não encontradas
+    if (localTime === maxTime) {
+      timeElement.classList.remove("warning");
+
+      // Esconder qualquer carta que esteja virada
       flipped.forEach((card) => {
         if (!card.classList.contains("encontrada")) {
           card.classList.add("escondida");
@@ -257,8 +277,7 @@ function tempo() {
       });
       flipped = [];
       scramble(); // Baralhar
-      contador = 0; // Reiniciar o contador
-      tempo(); // Reiniciar o temporizador
+      localTime = 0; // Reiniciar
     }
   }, 1000);
 }
