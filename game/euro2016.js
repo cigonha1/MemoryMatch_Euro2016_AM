@@ -22,7 +22,7 @@ const COLS = 4;
 game.sounds = sounds; // Adiciona os sons do jogo ao objeto game.
 game.board = Array(COLS)
   .fill()
-  .map(() => Array(ROWS)); // criação do tabuleiro como um array de 6 linhas x 8 colunas
+  .map(() => Array(ROWS)); // criação do tabuleiro como um array de 4 linhas x 4 colunas
 
 // Representa a imagem de uma carta de um país. Esta definição é apenas um modelo para outros objetos que sejam criados
 // com esta base através de let umaFace = Object.create(face).
@@ -77,7 +77,7 @@ function createCountries() {
 function scramble() {
   let allCards = Array.from(document.querySelectorAll(".carta"));
 
-  // Separate matched and unmatched cards
+  // Separar as cartas encontradas e não encontradas
   let matchedCards = allCards.filter((card) =>
     card.classList.contains("encontrada")
   );
