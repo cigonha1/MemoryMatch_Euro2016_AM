@@ -4,9 +4,10 @@
  *
  */
 
-const game = {}; // encapsula a informação do jogo. Está vazio mas será preenchido com definições adicionais.
+const game =
+  {}; /* encapsula a informação do jogo. Está vazio mas será preenchido com definições adicionais. */
 
-// sons do jogo
+/* sons do jogo */
 const sounds = {
   background: "",
   flip: "",
@@ -15,36 +16,39 @@ const sounds = {
   win: "",
 };
 
-// número de linhas e colunas do tabuleiro
+/* número de linhas e colunas do tabuleiro */
 const ROWS = 4;
 const COLS = 4;
 
-game.sounds = sounds; // Adiciona os sons do jogo ao objeto game.
+game.sounds = sounds; /* Adiciona os sons do jogo ao objeto game. */
 game.board = Array(COLS)
   .fill()
-  .map(() => Array(ROWS)); // criação do tabuleiro como um array de 4 linhas x 4 colunas
+  .map(() =>
+    Array(ROWS)
+  ); /* criação do tabuleiro como um array de 4 linhas x 4 colunas */
 
-// Representa a imagem de uma carta de um país. Esta definição é apenas um modelo para outros objetos que sejam criados
-// com esta base através de let umaFace = Object.create(face).
+/* Representa a imagem de uma carta de um país. Esta definição é apenas um modelo para outros objetos que sejam criados
+   com esta base através de let umaFace = Object.create(face). */
 const face = {
   country: -1,
   x: -1,
   y: -1,
 };
 
-const CARDSIZE = 102; // tamanho da carta (altura e largura)
-let faces = []; // Array que armazena objetos face que contêm posicionamentos da imagem e códigos dos países
+const CARDSIZE = 102; /* tamanho da carta (altura e largura) */
+let faces =
+  []; /* Array que armazena objetos face que contêm posicionamentos da imagem e códigos dos países */
 
 window.addEventListener("load", init, false);
 
 function init() {
   game.stage = document.querySelector("#stage");
-  setupAudio(); // configurar o áudio
-  getFaces(); // calcular as faces e guardar no array faces
-  createCountries(); // criar países
-  tempo(); // iniciar o temporizador
+  setupAudio(); /* configura o áudio */
+  getFaces(); /* calcula as faces e guardar no array faces */
+  createCountries(); /* cria países */
+  tempo(); /* inicia o temporizador */
 
-  // Esperar interação para começar a música
+  /* Espera interação para começar a música */
   document.addEventListener("click", playBgSnd, { once: true });
 }
 
@@ -54,38 +58,45 @@ function playBgSnd() {
   });
 }
 
-// Cria os países e coloca-os no tabuleiro de jogo (array board[][])
+/* Cria os países e coloca-os no tabuleiro de jogo (array board[][]) */
 function createCountries() {
-  let indices = [...Array(8).keys(), ...Array(8).keys()]; // Cria um array com 8 elementos duplicados
-  indices.sort(() => Math.random() - 0.5); // Baralha os índices
+  let indices = [
+    ...Array(8).keys(),
+    ...Array(8).keys(),
+  ]; /* Cria um array com 8 elementos duplicados */
+  indices.sort(() => Math.random() - 0.5); /* Baralha os índices */
 
   for (let i = 0; i < 16; i++) {
     let umaCarta = document.createElement("div");
-    umaCarta.classList.add("carta", "escondida"); // Aplica as classes "carta" e "escondida" do CSS
+    umaCarta.classList.add(
+      "carta",
+      "escondida"
+    ); /* Aplica as classes "carta" e "escondida" do CSS */
 
-    // Posição da carta com base nas coordenadas das faces
+    /* Posição da carta com base nas coordenadas das faces */
     umaCarta.style.backgroundPositionX = faces[indices[i]].x;
     umaCarta.style.backgroundPositionY = faces[indices[i]].y;
-    umaCarta.dataset.country = faces[indices[i]].country; // Atribui o país à carta
+    umaCarta.dataset.country =
+      faces[indices[i]].country; /* Atribui o país à carta */
 
-    // Define tamanho e posição das cartas
+    /* Define tamanho e posição das cartas */
     umaCarta.style.width = `${CARDSIZE}px`;
     umaCarta.style.height = `${CARDSIZE}px`;
 
-    // Adiciona as cartas ao tabuleiro
+    /* Adiciona as cartas ao tabuleiro */
     game.stage.appendChild(umaCarta);
 
-    // Adiciona o evento de clique para virar as cartas
+    /* Evento de clique para virar as cartas */
     umaCarta.addEventListener("click", () => flipCard(umaCarta));
   }
   scramble();
 }
 
-// Baralha as cartas no tabuleiro
+/* Baralha as cartas no tabuleiro */
 function scramble() {
   let allCards = Array.from(document.querySelectorAll(".carta"));
 
-  // Separar as cartas encontradas e não encontradas
+  /* Separa as cartas encontradas e não encontradas */
   let matchedCards = allCards.filter((card) =>
     card.classList.contains("encontrada")
   );
@@ -93,17 +104,17 @@ function scramble() {
     (card) => !card.classList.contains("encontrada")
   );
 
-  // Primeiro virar todas as cartas não encontradas para cima
+  /* Primeiro vira todas as cartas não encontradas para cima */
   unmatchedCards.forEach((card) => {
     card.classList.remove("escondida");
   });
 
-  // Esperar um momento para mostrar as cartas viradas
+  /* Espera um momento para mostrar as cartas viradas */
   setTimeout(() => {
-    // Grid para todas as posições
+    /* Grid para todas as posições */
     let usedPositions = new Set();
 
-    // Marcar as posições das encontradas como utilizadas
+    /* Marca as posições das encontradas como utilizadas */
     matchedCards.forEach((card) => {
       let top = parseInt(card.style.top) || 0;
       let left = parseInt(card.style.left) || 0;
@@ -111,10 +122,10 @@ function scramble() {
       card.style.position = "absolute";
       card.style.top = `${top}px`;
       card.style.left = `${left}px`;
-      card.style.zIndex = "1"; // z-index inferior para cartas encontradas
+      card.style.zIndex = "1"; /* z-index inferior para cartas encontradas */
     });
 
-    // Encontrar posições disponíveis para cartas não encontradas
+    /* Encontra posições disponíveis para cartas não encontradas */
     let availablePositions = [];
     for (let y = 0; y < ROWS; y++) {
       for (let x = 0; x < COLS; x++) {
@@ -128,28 +139,29 @@ function scramble() {
       }
     }
 
-    // Baralhar as posições disponíveis
+    /* Baralha as posições disponíveis */
     availablePositions.sort(() => Math.random() - 0.5);
 
-    // Reposicionar as cartas não encontradas nas posições disponíveis
-    // mas mantê-las viradas para cima durante a reposição
+    /* Reposiciona as cartas não encontradas nas posições disponíveis
+    mas mantê-las viradas para cima durante a reposição */
     unmatchedCards.forEach((card, index) => {
       if (index < availablePositions.length) {
         card.style.position = "absolute";
         card.style.top = `${availablePositions[index].y}px`;
         card.style.left = `${availablePositions[index].x}px`;
-        card.style.zIndex = "2"; // z-index superior para cartas não encontradas
+        card.style.zIndex =
+          "2"; /* z-index superior para cartas não encontradas */
       }
     });
 
-    // Esperar um momento para mostrar as cartas nas novas posições
-    // e só depois escondê-las
+    /* Espera um momento para mostrar as cartas nas novas posições
+    e só depois escondê-las */
     setTimeout(() => {
       unmatchedCards.forEach((card) => {
-        card.classList.add("escondida"); // Agora sim, escondemos as cartas
+        card.classList.add("escondida");
       });
-    }, 1000); // Deixa as cartas visíveis por 1 segundo após terem sido reposicionadas
-  }, 1000); // Mostra as cartas por 1 segundo antes de reposicionar
+    }, 1000);
+  }, 1000);
 }
 
 let flipped = [];
@@ -160,7 +172,7 @@ function flipCard(card) {
     !card.classList.contains("encontrada") &&
     !flipped.includes(card)
   ) {
-    card.classList.remove("escondida"); // Vira a carta
+    card.classList.remove("escondida"); /* Vira a carta */
     game.sounds.flip.play();
     flipped.push(card);
 
@@ -170,23 +182,27 @@ function flipCard(card) {
   }
 }
 
-// Verifica se encontrou o par
+/* Verifica se encontrou o par */
 function checkMatch(cards) {
   if (cards[0].dataset.country === cards[1].dataset.country) {
-    cards.forEach((card) => card.classList.add("encontrada", "matched")); // Marca as cartas como encontradas e aplica a animação
+    cards.forEach((card) =>
+      card.classList.add("encontrada", "matched")
+    ); /* Marca as cartas como encontradas e aplica a animação */
     game.sounds.success.play();
-    flipped = []; // Reseta as cartas viradas
+    flipped = []; /* Reseta o array de cartas viradas */
     checkForWin();
   } else {
     setTimeout(() => {
-      cards.forEach((card) => card.classList.add("escondida")); // Volta a virar as cartas
+      cards.forEach((card) =>
+        card.classList.add("escondida")
+      ); /* Volta a virar as cartas */
       game.sounds.hide.play();
-      flipped = []; // Reseta as cartas viradas
-    }, 500); // Deixa as cartas visíveis por 500ms antes de voltar a esconder
+      flipped = [];
+    }, 500); /* Deixa as cartas visíveis por 500ms antes de voltar a esconder */
   }
 }
 
-// Verifica se o jogador ganhou
+/* Verifica se o jogador ganhou */
 function checkForWin() {
   let allCards = Array.from(document.querySelectorAll(".carta"));
   let unmatchedCards = allCards.filter(
@@ -194,7 +210,7 @@ function checkForWin() {
   );
 
   if (unmatchedCards.length === 0) {
-    // Criar div com sumário
+    /* Criar um div com o sumário de jogo */
     let summary = document.createElement("div");
     summary.style.cssText = `
       position: fixed;
@@ -216,9 +232,9 @@ function checkForWin() {
     document.body.appendChild(summary);
 
     sounds.win.play();
-    clearInterval(timeHandler); // Para o temporizador
+    clearInterval(timeHandler); /* Para o temporizador */
 
-    // Verifica se o sumário existe
+    /* Verifica se o sumário existe */
     setTimeout(() => {
       if (document.body.contains(summary)) {
         document.body.removeChild(summary);
@@ -229,28 +245,28 @@ function checkForWin() {
 }
 
 function restartGame() {
-  // Reseta as variáveis de jogo
+  /* Reseta as variáveis de jogo */
   flipped = [];
   globalTime = 0;
 
-  // Remove o sumário de jogo, se existir
+  /* Remove o sumário de jogo, se existir */
   const summary = document.querySelector("div[style*='z-index: 100']");
   if (summary && document.body.contains(summary)) {
     document.body.removeChild(summary);
   }
 
-  // Limpar o tabuliro
+  /* Limpa o tabuleiro */
   game.stage.innerHTML = "";
 
-  // Recria o tabuleiro e reinicia o jogo
+  /* Recria o tabuleiro e reinicia o jogo */
   createCountries();
   tempo();
 }
 
-// Evento para reiniciar o jogo ao pressionar a tecla "Espaço"
+/* Evento para reiniciar o jogo ao pressionar a tecla "Espaço" */
 window.addEventListener("keydown", (event) => {
   if (event.code === "Space") {
-    // Remove o sumário de jogo
+    /* Remove o sumário de jogo */
     const summary = document.querySelector("div[style*='z-index: 100']");
     if (summary) {
       document.body.removeChild(summary);
@@ -260,12 +276,15 @@ window.addEventListener("keydown", (event) => {
 });
 
 let timeHandler;
-let globalTime = 0; // Cronómetro global
+let globalTime = 0; /* Cronómetro global */
 
 function tempo() {
-  let localTime = 0; // Cronómetro local
+  let localTime = 0; /* Cronómetro local */
   const maxTime = 45;
   const timeElement = document.getElementById("time");
+
+  /* Garante que a classe warning não está aplicada no início */
+  timeElement.classList.remove("warning");
 
   if (timeHandler) {
     clearInterval(timeHandler);
@@ -275,25 +294,31 @@ function tempo() {
     globalTime++;
     localTime++;
 
+    /* Atualiza a barra de progresso */
     timeElement.value = localTime;
 
-    // Warning de 5 segundos
-    if (localTime === maxTime - 5) {
-      timeElement.classList.add("warning");
+    /* Warning de 5 segundos */
+    if (localTime >= maxTime - 5 && localTime < maxTime) {
+      if (!timeElement.classList.contains("warning")) {
+        timeElement.classList.add("warning");
+      }
+    } else {
+      timeElement.classList.remove("warning");
     }
 
     if (localTime === maxTime) {
+      /* Remove a classe warning */
       timeElement.classList.remove("warning");
 
-      // Esconder qualquer carta que esteja virada
+      /* Esconde qualquer carta que esteja virada */
       flipped.forEach((card) => {
         if (!card.classList.contains("encontrada")) {
           card.classList.add("escondida");
         }
       });
       flipped = [];
-      scramble(); // Baralhar
-      localTime = 0; // Reiniciar
+      scramble(); /* Baralha */
+      localTime = 0; /* Reinicia */
     }
   }, 1000);
 }
@@ -302,7 +327,7 @@ function tempo() {
  ** /!\ NÃO MODIFICAR ESTAS FUNÇÕES /!\
 -------------------------------------------------------------------------------------------------- */
 
-// configuração do áudio
+/* configuração do áudio */
 function setupAudio() {
   game.sounds.background = document.querySelector("#backgroundSnd");
   game.sounds.success = document.querySelector("#successSnd");
@@ -310,13 +335,13 @@ function setupAudio() {
   game.sounds.hide = document.querySelector("#hideSnd");
   game.sounds.win = document.querySelector("#goalSnd");
 
-  // definições de volume
-  game.sounds.background.volume = 0.05; // o volume varia entre 0 e 1
+  /* definições de volume */
+  game.sounds.background.volume = 0.05; /* o volume varia entre 0 e 1 */
 
-  // nesta pode-se mexer se for necessário acrescentar ou configurar mais sons
+  /* nesta pode-se mexer se for necessário acrescentar ou configurar mais sons */
 }
 
-// calcula as coordenadas das imagens da seleção de cada país e atribui um código único
+/* calcula as coordenadas das imagens da seleção de cada país e atribui um código único */
 function getFaces() {
   /* NÃO MODIFICAR ESTA FUNÇÃO */
   let offsetX = 1;
@@ -324,11 +349,16 @@ function getFaces() {
   for (let i = 0; i < 3; i++) {
     offsetX = 1;
     for (let j = 0; j < 3; j++) {
-      let countryFace = Object.create(face); // criar um objeto com base no objeto face
-      countryFace.x = -(j * CARDSIZE + offsetX) + "px"; // cálculo da coordenada x na imagem
-      countryFace.y = -(i * CARDSIZE + offsetY) + "px"; // cálculo da coordenada y na imagem
-      countryFace.country = "" + i + "" + j; // criação do código do país
-      faces.push(countryFace); // guardar o objeto no array de faces
+      let countryFace =
+        Object.create(face); /* cria um objeto com base no objeto face */
+      countryFace.x =
+        -(j * CARDSIZE + offsetX) +
+        "px"; /* cálculo da coordenada x na imagem */
+      countryFace.y =
+        -(i * CARDSIZE + offsetY) +
+        "px"; /* cálculo da coordenada y na imagem */
+      countryFace.country = "" + i + "" + j; /* criação do código do país */
+      faces.push(countryFace); /* guarda o objeto no array de faces */
       offsetX += 2;
     }
     offsetY += 2;

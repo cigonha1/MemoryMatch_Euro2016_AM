@@ -66,19 +66,59 @@ body {
   position: fixed;
   bottom: 0px;
   width: 100%;
-  color: blue;
   border: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
-/* classe que anima a progress bar quando é adicionada à sua lista de classes*/
+
+/* Cores base para os elementos da barra de progresso em todos os navegadores */
+progress#time::-webkit-progress-value {
+  background-color: blue;
+}
+
+progress#time::-moz-progress-bar {
+  background-color: blue;
+}
+
+progress#time::-ms-fill {
+  background-color: blue;
+}
+
+/* Para Edge específico */
+progress#time {
+  color: blue;
+}
+
+/* classe que anima a progress bar quando é adicionada à sua lista de classes */
 .warning {
   animation: wa alternate 1s infinite;
 }
 
+/* Animação com keyframes */
 @keyframes wa {
-  from {
+  0% {
     background-color: blue;
   }
-  from {
+  100% {
+    background-color: red;
+  }
+}
+
+/* Animações específicas para browsers diferentes */
+@-webkit-keyframes wa {
+  0% {
+    background-color: blue;
+  }
+  100% {
+    background-color: red;
+  }
+}
+
+@-moz-keyframes wa {
+  0% {
+    background-color: blue;
+  }
+  100% {
     background-color: red;
   }
 }
