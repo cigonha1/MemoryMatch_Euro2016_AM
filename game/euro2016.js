@@ -83,8 +83,7 @@ function createCountries() {
     umaCarta.style.width = `${CARDSIZE}px`;
     umaCarta.style.height = `${CARDSIZE}px`;
 
-    /* Adiciona as cartas ao tabuleiro */
-    game.stage.appendChild(umaCarta);
+    game.stage.appendChild(umaCarta); /* Adiciona as cartas ao tabuleiro */
 
     /* Evento de clique para virar as cartas */
     umaCarta.addEventListener("click", () => flipCard(umaCarta));
@@ -104,15 +103,14 @@ function scramble() {
     (card) => !card.classList.contains("encontrada")
   );
 
-  /* Primeiro vira todas as cartas não encontradas para cima */
+  /* Vira todas as cartas não encontradas para cima */
   unmatchedCards.forEach((card) => {
     card.classList.remove("escondida");
   });
 
-  /* Espera um momento para mostrar as cartas viradas */
+  /* Momento para mostrar as cartas */
   setTimeout(() => {
-    /* Grid para todas as posições */
-    let usedPositions = new Set();
+    let usedPositions = new Set(); /* Grid para todas as posições */
 
     /* Marca as posições das encontradas como utilizadas */
     matchedCards.forEach((card) => {
@@ -139,11 +137,11 @@ function scramble() {
       }
     }
 
-    /* Baralha as posições disponíveis */
-    availablePositions.sort(() => Math.random() - 0.5);
+    availablePositions.sort(
+      () => Math.random() - 0.5
+    ); /* Baralha as posições disponíveis */
 
-    /* Reposiciona as cartas não encontradas nas posições disponíveis
-    mas mantê-las viradas para cima durante a reposição */
+    /* Reposiciona as cartas não encontradas nas posições disponíveis */
     unmatchedCards.forEach((card, index) => {
       if (index < availablePositions.length) {
         card.style.position = "absolute";
@@ -154,7 +152,7 @@ function scramble() {
       }
     });
 
-    /* Espera um momento para mostrar as cartas nas novas posições
+    /* Momento para mostrar as cartas nas novas posições
     e só depois escondê-las */
     setTimeout(() => {
       unmatchedCards.forEach((card) => {
@@ -202,6 +200,8 @@ function checkMatch(cards) {
   }
 }
 
+let timeoutHandler; // Store the timeout reference globally
+
 /* Verifica se o jogador ganhou */
 function checkForWin() {
   let allCards = Array.from(document.querySelectorAll(".carta"));
@@ -212,18 +212,7 @@ function checkForWin() {
   if (unmatchedCards.length === 0) {
     /* Criar um div com o sumário de jogo */
     let summary = document.createElement("div");
-    summary.style.cssText = `
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #1f4952;
-      color: white;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      z-index: 100;
-    `;
+    summary.classList.add("summary");
     summary.innerHTML = `
       <h2>Parabéns!</h2>
       <p>Completaste o jogo em ${globalTime} segundos!</p>
@@ -235,7 +224,7 @@ function checkForWin() {
     clearInterval(timeHandler); /* Para o temporizador */
 
     /* Verifica se o sumário existe */
-    setTimeout(() => {
+    timeoutHandler = setTimeout(() => {
       if (document.body.contains(summary)) {
         document.body.removeChild(summary);
       }
@@ -266,10 +255,15 @@ function restartGame() {
 /* Evento para reiniciar o jogo ao pressionar a tecla "Espaço" */
 window.addEventListener("keydown", (event) => {
   if (event.code === "Space") {
-    /* Remove o sumário de jogo */
-    const summary = document.querySelector("div[style*='z-index: 100']");
-    if (summary) {
+    const summary = document.querySelector(".summary");
+    if (summary && document.body.contains(summary)) {
       document.body.removeChild(summary);
+    }
+
+    /* Cancela timeout de 5 segundos */
+    if (timeoutHandler) {
+      clearTimeout(timeoutHandler);
+      timeoutHandler = null;
     }
     restartGame();
   }
@@ -282,9 +276,9 @@ function tempo() {
   let localTime = 0; /* Cronómetro local */
   const maxTime = 45;
   const timeElement = document.getElementById("time");
-
-  /* Garante que a classe warning não está aplicada no início */
-  timeElement.classList.remove("warning");
+  timeElement.classList.remove(
+    "warning"
+  ); /* Garante que a classe warning não está aplicada no início */
 
   if (timeHandler) {
     clearInterval(timeHandler);
@@ -294,21 +288,19 @@ function tempo() {
     globalTime++;
     localTime++;
 
-    /* Atualiza a barra de progresso */
-    timeElement.value = localTime;
+    timeElement.value = localTime; /* Atualiza a barra de progresso */
 
     /* Warning de 5 segundos */
-    if (localTime >= maxTime - 5 && localTime < maxTime) {
-      if (!timeElement.classList.contains("warning")) {
-        timeElement.classList.add("warning");
+    if (localTime >= maxTime - 5) {
+      if (!timeElement.classList.contains("almost")) {
+        timeElement.classList.add("almost");
       }
     } else {
-      timeElement.classList.remove("warning");
+      timeElement.classList.remove("almost");
     }
 
     if (localTime === maxTime) {
-      /* Remove a classe warning */
-      timeElement.classList.remove("warning");
+      timeElement.classList.remove("almost"); /* Remove a classe warning */
 
       /* Esconde qualquer carta que esteja virada */
       flipped.forEach((card) => {

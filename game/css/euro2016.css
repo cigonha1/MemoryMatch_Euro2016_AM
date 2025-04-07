@@ -66,36 +66,43 @@ body {
   position: fixed;
   bottom: 0px;
   width: 100%;
-  border: none;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-/* Cores base para os elementos da barra de progresso em todos os navegadores */
-progress#time::-webkit-progress-value {
-  background-color: blue;
-}
-
-progress#time::-moz-progress-bar {
-  background-color: blue;
-}
-
-progress#time::-ms-fill {
-  background-color: blue;
-}
-
-/* Para Edge específico */
-progress#time {
   color: blue;
+  border: none;
 }
-
-/* classe que anima a progress bar quando é adicionada à sua lista de classes */
+/* classe que anima a progress bar quando é adicionada à sua lista de classes*/
 .warning {
   animation: wa alternate 1s infinite;
 }
 
-/* Animação com keyframes */
 @keyframes wa {
+  from {
+    background-color: blue;
+  }
+  from {
+    background-color: red;
+  }
+}
+
+/* Adicionado posteriormente */
+
+/* Microsoft Edge */
+progress::-webkit-progress-bar {
+  background-color: #e0e0e0; /* Background default */
+}
+
+progress::-webkit-progress-value {
+  background-color: blue; /* Cor default */
+}
+
+progress.almost::-webkit-progress-value {
+  background-color: red; /* Cor para warning */
+}
+
+progress.almost {
+  animation: blink 1s infinite; /* Blinking effect */
+}
+
+@keyframes blink {
   0% {
     background-color: blue;
   }
@@ -104,21 +111,16 @@ progress#time {
   }
 }
 
-/* Animações específicas para browsers diferentes */
-@-webkit-keyframes wa {
-  0% {
-    background-color: blue;
-  }
-  100% {
-    background-color: red;
-  }
-}
-
-@-moz-keyframes wa {
-  0% {
-    background-color: blue;
-  }
-  100% {
-    background-color: red;
-  }
+/* sumário de jogo */
+.summary {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #1f4952;
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  z-index: 100;
 }
