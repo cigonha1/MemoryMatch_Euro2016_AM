@@ -93,47 +93,63 @@ function scramble() {
     (card) => !card.classList.contains("encontrada")
   );
 
-  // Grid para todas as posições
-  let usedPositions = new Set();
-
-  // Marcar as posições das encontradas como utilizadas
-  matchedCards.forEach((card) => {
-    let top = parseInt(card.style.top) || 0;
-    let left = parseInt(card.style.left) || 0;
-    usedPositions.add(`${top},${left}`);
-    card.style.position = "absolute";
-    card.style.top = `${top}px`;
-    card.style.left = `${left}px`;
-    card.style.zIndex = "1"; // z-index inferior para cartas encontradas
+  // Primeiro virar todas as cartas não encontradas para cima
+  unmatchedCards.forEach((card) => {
+    card.classList.remove("escondida");
   });
 
-  // Encontrar posições disponíveis para cartas não encontradas
-  let availablePositions = [];
-  for (let y = 0; y < ROWS; y++) {
-    for (let x = 0; x < COLS; x++) {
-      let pos = `${y * CARDSIZE},${x * CARDSIZE}`;
-      if (!usedPositions.has(pos)) {
-        availablePositions.push({
-          x: x * CARDSIZE,
-          y: y * CARDSIZE,
-        });
+  // Esperar um momento para mostrar as cartas viradas
+  setTimeout(() => {
+    // Grid para todas as posições
+    let usedPositions = new Set();
+
+    // Marcar as posições das encontradas como utilizadas
+    matchedCards.forEach((card) => {
+      let top = parseInt(card.style.top) || 0;
+      let left = parseInt(card.style.left) || 0;
+      usedPositions.add(`${top},${left}`);
+      card.style.position = "absolute";
+      card.style.top = `${top}px`;
+      card.style.left = `${left}px`;
+      card.style.zIndex = "1"; // z-index inferior para cartas encontradas
+    });
+
+    // Encontrar posições disponíveis para cartas não encontradas
+    let availablePositions = [];
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        let pos = `${y * CARDSIZE},${x * CARDSIZE}`;
+        if (!usedPositions.has(pos)) {
+          availablePositions.push({
+            x: x * CARDSIZE,
+            y: y * CARDSIZE,
+          });
+        }
       }
     }
-  }
 
-  // Baralhar as posições disponíveis
-  availablePositions.sort(() => Math.random() - 0.5);
+    // Baralhar as posições disponíveis
+    availablePositions.sort(() => Math.random() - 0.5);
 
-  // Colocar as cartas não encontradas nas posições disponíveis
-  unmatchedCards.forEach((card, index) => {
-    if (index < availablePositions.length) {
-      card.style.position = "absolute";
-      card.style.top = `${availablePositions[index].y}px`;
-      card.style.left = `${availablePositions[index].x}px`;
-      card.style.zIndex = "2"; // z-index superior para cartas não encontradas
-      card.classList.add("escondida");
-    }
-  });
+    // Reposicionar as cartas não encontradas nas posições disponíveis
+    // mas mantê-las viradas para cima durante a reposição
+    unmatchedCards.forEach((card, index) => {
+      if (index < availablePositions.length) {
+        card.style.position = "absolute";
+        card.style.top = `${availablePositions[index].y}px`;
+        card.style.left = `${availablePositions[index].x}px`;
+        card.style.zIndex = "2"; // z-index superior para cartas não encontradas
+      }
+    });
+
+    // Esperar um momento para mostrar as cartas nas novas posições
+    // e só depois escondê-las
+    setTimeout(() => {
+      unmatchedCards.forEach((card) => {
+        card.classList.add("escondida"); // Agora sim, escondemos as cartas
+      });
+    }, 1000); // Deixa as cartas visíveis por 1 segundo após terem sido reposicionadas
+  }, 1000); // Mostra as cartas por 1 segundo antes de reposicionar
 }
 
 let flipped = [];
