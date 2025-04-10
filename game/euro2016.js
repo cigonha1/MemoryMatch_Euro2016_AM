@@ -60,6 +60,9 @@ function playBgSnd() {
 
 /* Cria os países e coloca-os no tabuleiro de jogo (array board[][]) */
 function createCountries() {
+  /* Limpa o tabuleiro antes de criar novas cartas */
+  game.stage.innerHTML = "";
+
   let indices = [
     ...Array(8).keys(),
     ...Array(8).keys(),
@@ -82,6 +85,9 @@ function createCountries() {
     /* Define tamanho e posição das cartas */
     umaCarta.style.width = `${CARDSIZE}px`;
     umaCarta.style.height = `${CARDSIZE}px`;
+    umaCarta.style.position = "absolute";
+    umaCarta.style.top = `${Math.floor(i / COLS) * CARDSIZE}px`;
+    umaCarta.style.left = `${(i % COLS) * CARDSIZE}px`;
 
     game.stage.appendChild(umaCarta); /* Adiciona as cartas ao tabuleiro */
 
